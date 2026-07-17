@@ -1,4 +1,6 @@
 FMCG Supply Chain Integrity Engine: Exposing the Primary-Secondary Sales Gap
+
+
 📖 Project Overview
 In the Fast-Moving Consumer Goods (FMCG) and Consumer Packaged Goods (CPG) sectors, the gap between Primary Sales (what a company ships to a distributor) and Secondary Sales (what the distributor claims to sell to retailers/Kiranas) is a multi-million dollar blind spot.
 
