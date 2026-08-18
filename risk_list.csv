@@ -1,0 +1,21 @@
+distributor_id,distributor_name,region,stuffing_flags,promo_leak_flags,route_dump_events,bulk_volume_pct,stuffing_pts,promo_pts,route_pts,risk_score,risk_tier
+DIST005,Enterprise Sales 5,Rural,5,0,0,0.0,40,0,0,40,HIGH
+DIST012,Enterprise Sales 12,Rural,0,0,168,29.7,0,0,30,30,HIGH
+DIST018,Enterprise Sales 18,Urban,0,1,0,0.0,0,30,0,30,HIGH
+DIST003,Enterprise Sales 3,Urban,1,0,0,0.0,10,0,0,10,MEDIUM
+DIST001,Enterprise Sales 1,Urban,0,0,0,0.0,0,0,0,0,CLEAN
+DIST002,Enterprise Sales 2,Urban,0,0,0,0.0,0,0,0,0,CLEAN
+DIST004,Enterprise Sales 4,Rural,0,0,0,0.0,0,0,0,0,CLEAN
+DIST006,Enterprise Sales 6,Urban,0,0,0,0.0,0,0,0,0,CLEAN
+DIST007,Enterprise Sales 7,Urban,0,0,0,0.0,0,0,0,0,CLEAN
+DIST008,Enterprise Sales 8,Urban,0,0,0,0.0,0,0,0,0,CLEAN
+DIST009,Enterprise Sales 9,Rural,0,0,0,0.0,0,0,0,0,CLEAN
+DIST010,Enterprise Sales 10,Rural,0,0,0,0.0,0,0,0,0,CLEAN
+DIST011,Enterprise Sales 11,Urban,0,0,0,0.0,0,0,0,0,CLEAN
+DIST013,Enterprise Sales 13,Urban,0,0,0,0.0,0,0,0,0,CLEAN
+DIST014,Enterprise Sales 14,Rural,0,0,0,0.0,0,0,0,0,CLEAN
+DIST015,Enterprise Sales 15,Semi-Urban,0,0,0,0.0,0,0,0,0,CLEAN
+DIST016,Enterprise Sales 16,Urban,0,0,0,0.0,0,0,0,0,CLEAN
+DIST017,Enterprise Sales 17,Semi-Urban,0,0,0,0.0,0,0,0,0,CLEAN
+DIST019,Enterprise Sales 19,Urban,0,0,0,0.0,0,0,0,0,CLEAN
+DIST020,Enterprise Sales 20,Semi-Urban,0,0,0,0.0,0,0,0,0,CLEAN
