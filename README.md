@@ -1,231 +1,128 @@
-# FMCG Supply Chain Integrity Engine
+# FMCG Supply Chain Integrity Engine: Exposing the Primary-Secondary Sales Gap
 
-## Overview
+## 📖 Project Overview
 
-This project focuses on one of the common problems in the FMCG supply chain: the mismatch between **Primary Sales** (company to distributor) and **Secondary Sales** (distributor to retailer).
+In the Fast-Moving Consumer Goods (FMCG) and Consumer Packaged Goods (CPG) sectors, the gap between **Primary Sales** (what a company ships to a distributor) and **Secondary Sales** (what the distributor claims to sell to retailers/Kiranas) is a multi-million dollar blind spot. 
 
-Many FMCG companies rely on distributor-reported secondary sales for demand planning, promotional analysis, and inventory management. However, secondary sales data may not always represent actual market movement because of practices such as inventory hoarding, delayed billing, target-driven stock loading, or incorrect delivery reporting.
+This gap isn't just a software bug or a data delay; it is a human behavioral problem rooted in physical reality. Distributors may hoard promotional stock, falsify delivery routes to save fuel, or be forced into buying excess inventory to meet sales targets. 
 
-The objective of this project is to build an analytical data warehouse that identifies these inconsistencies using SQL, Python, and Business Intelligence dashboards.
+This project is an **Analytical Data Engine** designed to mathematically corner these discrepancies. By modeling specific human behaviors and identifying anomalies in the supply chain data, this engine exposes the truth behind inventory movement.
 
----
+## 🏗️ Core Architecture
 
-## Business Problem
+The architecture relies on trapping discrepancies across three distinct metrics:
 
-The project attempts to answer questions such as:
-
-- Are distributors buying inventory only to achieve monthly targets?
-- Are promotional products actually reaching retailers?
-- Are distributors reporting unrealistic delivery behaviour?
-- Which distributors consistently show suspicious inventory movement?
-
-Instead of relying only on manual audits, the project uses data analysis to identify unusual sales patterns.
-
----
-
-## Data Warehouse Design
-
-### Fact Tables
-
-| Table | Description |
-|--------|-------------|
-| `fact_primary_sales` | Product shipments from company to distributor |
-| `fact_secondary_sales` | Distributor sales to retailers |
-| `fact_stock_reconciliation` | Daily calculated inventory position |
+| Source System | Table | What it Measures | The "Lie" Factor |
+| :--- | :--- | :--- | :--- |
+| **Company ERP (SAP/Oracle)** | `fact_primary_sales` | What left the factory and hit the distributor's warehouse. | **Very Low.** Tied to revenue and tax. |
+| **Distributor App (DMS)** | `fact_secondary_sales` | What the distributor claims they sold to the Kirana store. | **High.** Prone to falsified dates and bulk-billing. |
+| **Automated ETL Output** | `fact_stock_reconciliation` | The daily mathematical truth: *(Opening Stock + Primary) - Secondary*. | **None.** This is where the gaps are exposed. |
 
 ### Dimension Tables
+To support the analytical queries, the warehouse will include:
+* `dim_date`, `dim_distributor`, `dim_kirana`, `dim_product`, `dim_promotion`
 
-- `dim_date`
-- `dim_product`
-- `dim_distributor`
-- `dim_kirana`
-- `dim_promotion`
+## 🎯 Key Analytical Objectives (The Blind Spots)
 
-The warehouse follows a star schema so that analytical queries can be executed efficiently.
+This engine is built to solve three specific problems using advanced SQL:
 
----
+1. **Channel Stuffing Detection:** Identifying spikes in primary sales at month-end without corresponding secondary sales growth, indicating inventory dumping rather than actual growth.
+2. **The Promotion Leakage Trap:** Flagging instances where secondary sales of a promoted SKU drop to zero during a promo window, only to spike at full price immediately after.
+3. **Route/Beat Falsification:** Detecting impossible delivery metrics (e.g., massive bulk drops to a single rural retailer) that indicate a distributor is skipping routes to save logistics costs.
 
-## Analytical Objectives
+## 📊 Results (Blind Detection Run)
 
-### 1. Channel Stuffing Detection
+The engine screened all 20 distributors with no knowledge of who the planted anomalies were — and flagged exactly the three:
 
-Detect distributors receiving unusually high primary sales near month-end without a corresponding increase in secondary sales.
+| Distributor | Fraud Detected | Key Evidence | Score / Tier |
+| :--- | :--- | :--- | :--- |
+| **DIST005** | Channel Stuffing | 5 month-ends buying 8–20× his normal volume while secondary sales stayed flat (611 vs a 635/day average) | **40 — HIGH** |
+| **DIST012** | Route Falsification | 168 bulk drops of 100–300 units to single kirana shops — 29.7% of his entire volume (z-score 8.5) | **30 — HIGH** |
+| **DIST018** | Promotion Leakage | Zero sales during the 20% promo while holding 91,499 units in stock, then a 3×-baseline dump the morning after it ended | **30 — HIGH** |
 
-Possible indicators:
+16 distributors scored CLEAN; one honest distributor showed a single mild statistical flag (MEDIUM — a routine check, exactly how a real investigate-list should behave).
 
-- Month-end shipment spikes
-- Rising warehouse inventory
-- Low sell-through percentage
+![Ranked risk list](reports/charts/risk_ranking.png)
 
----
+*Open `reports/dashboard.html` for the full Regional Sales Manager dashboard — one self-contained file, no server needed.*
 
-### 2. Promotion Leakage Detection
+## 🗺️ Roadmap & Action Plan
 
-Identify products that receive promotional inventory but are not sold during the promotional period.
+- [x] **Phase 1: Synthetic Data Generation (Python)** — *DONE*
+  - [x] Write a Python script to generate baseline `dim` and `fact` tables.
+  - [x] Inject specific, skewed data to simulate Channel Stuffing.
+  - [x] Inject anomalies to simulate Promotion Hoarding.
+  - [x] Inject outliers to simulate Route Falsification.
+- [x] **Phase 2: Data Warehouse Design (SQL)** — *DONE*
+  - [x] Define the DDL (Data Definition Language) schemas for all tables (`sql/01_schema.sql`).
+  - [x] Load the synthetic CSV data into PostgreSQL via `COPY` (`sql/02_load_data.sql`).
+  - [x] Build the daily `fact_stock_reconciliation` ledger (`sql/03_stock_reconciliation.sql`).
+- [x] **Phase 3: The Analytical Engine (Advanced SQL)** — *DONE*
+  - [x] Write the query to detect Channel Stuffing (Time-series / Window functions). (`sql/04_detect_channel_stuffing.sql`)
+  - [x] Write the query to detect Promotion Leakage (Lag/Lead analysis). (`sql/05_detect_promotion_leakage.sql`)
+  - [x] Write the query to detect Route Falsification (Outlier detection). (`sql/06_detect_route_falsification.sql`)
+  - [x] Create a "Fraud Risk Score" View aggregating these flags per distributor. (`sql/07_fraud_risk_view.sql`)
+- [x] **Phase 4: Presentation & Visualization** — *DONE*
+  - [x] Build a dashboard simulating a Regional Sales Manager's view. (`build_dashboard.py` → `reports/dashboard.html` — self-contained, charts embedded, opens in any browser)
+  - [x] Highlight the actionable "Risk List" of distributors. (KPI cards + ranked table with tier badges + `reports/risk_list.csv`)
 
-Possible indicators:
+## 🛠️ Technology Stack
+* **Data Generation:** Python (Pandas, Numpy)
+* **Data Storage/Processing:** PostgreSQL 16.9 (portable install, runs locally with no admin rights)
+* **Analysis:** Advanced SQL
+* **Visualization:** Python + matplotlib → single-file HTML dashboard (`reports/dashboard.html`)
 
-- Near-zero secondary sales during promotion
-- Sudden increase in sales immediately after promotion ends
-- Large remaining stock during the campaign
-
----
-
-### 3. Route or Beat Validation
-
-Detect unusual delivery behaviour using secondary sales data.
-
-Examples include:
-
-- Very large deliveries to a single retailer
-- Abnormally low retailer coverage
-- Repeated bulk billing on the same day
-
----
-
-### 4. Inventory Reconciliation
-
-Calculate expected stock using
-
-```
-Opening Stock
-+ Primary Sales
-- Secondary Sales
-= Closing Stock
-```
-
-Large deviations indicate potential reporting or operational issues.
-
----
-
-## Project Workflow
-
-### Phase 1 – Data Generation
-
-Generate synthetic FMCG data using Python.
-
-Tasks:
-
-- Create master data
-- Generate daily transactions
-- Simulate distributor behaviour
-- Inject realistic anomalies
-
-Libraries:
-
-- Pandas
-- NumPy
-- Faker
-
----
-
-### Phase 2 – Database Design
-
-Create the warehouse schema.
-
-Tasks:
-
-- Design star schema
-- Write DDL scripts
-- Load CSV data into PostgreSQL
-
----
-
-### Phase 3 – SQL Analytics
-
-Develop SQL queries to identify supply chain anomalies.
-
-Key SQL concepts:
-
-- Window Functions
-- CTEs
-- Aggregations
-- CASE statements
-- LAG / LEAD
-- Ranking Functions
-
-Outputs include:
-
-- Channel Stuffing Report
-- Promotion Leakage Report
-- Inventory Reconciliation Report
-- Distributor Risk Score
-
----
-
-### Phase 4 – Dashboard
-
-Build a Power BI dashboard for business users.
-
-Dashboard pages:
-
-- Executive Overview
-- Distributor Performance
-- Inventory Reconciliation
-- Promotion Analysis
-- High Risk Distributor List
-
----
-
-## Technology Stack
-
-| Category | Tools |
-|----------|-------|
-| Programming | Python |
-| Data Processing | Pandas, NumPy |
-| Data Generation | Faker |
-| Database | PostgreSQL |
-| Analytics | SQL |
-| Visualization | Power BI |
-
----
-
-## Folder Structure
+## 📁 Project Structure
 
 ```
-FMCG-Supply-Chain-Integrity-Engine/
-│
-├── data/
-│   ├── raw/
-│   ├── processed/
-│
+├── generate_data.py                 # Phase 1: synthetic data + planted anomalies
+├── build_dashboard.py               # Phase 4: renders charts → dashboard.html
+├── start_postgres.bat               # start/stop the local PostgreSQL server
+├── stop_postgres.bat
+├── rebuild_warehouse.bat            # drop + reload + rebuild ledger from CSVs
+├── requirements.txt
+├── README.md
+├── data/                            # generated CSVs (dimensions + facts)
 ├── sql/
-│   ├── schema.sql
-│   ├── data_load.sql
-│   ├── channel_stuffing.sql
-│   ├── promotion_leakage.sql
-│   ├── route_validation.sql
-│   └── distributor_risk_score.sql
-│
-├── python/
-│   ├── generate_data.py
-│   ├── anomaly_generator.py
-│   └── reconciliation.py
-│
-├── dashboard/
-│   └── FMCG_Dashboard.pbix
-│
-├── images/
-│
-└── README.md
+│   ├── 01_schema.sql                # DDL: star schema (PK/FK/CHECK + indexes)
+│   ├── 02_load_data.sql             # bulk load via COPY + promo seed
+│   ├── 03_stock_reconciliation.sql  # daily inventory ledger (the truth table)
+│   ├── 04_detect_channel_stuffing.sql
+│   ├── 05_detect_promotion_leakage.sql
+│   ├── 06_detect_route_falsification.sql
+│   ├── 07_fraud_risk_view.sql       # vw_fraud_risk_score (fused risk list)
+│   └── 08_dashboard_exports.sql     # extracts for the dashboard
+└── reports/
+    ├── dashboard.html               # ← THE DELIVERABLE (self-contained)
+    ├── risk_list.csv                # full scored distributor list
+    ├── charts/                      # rendered chart PNGs
+    └── csv/                         # dashboard extracts (regenerable)
+
+**`FMCG_Project_and_Interview_Guide.pdf`** — a 39-page complete project walkthrough and interview preparation guide (every SQL file, every live query output, chart design rationale, 20 Q&A, demo runbook). Build sources in `docs/source/`.
 ```
 
----
+## 🚀 How to Run
 
-## Expected Outcomes
+1. **Start the database** (double-click): `start_postgres.bat`
+2. **Rebuild the warehouse** from CSVs: `rebuild_warehouse.bat` (or run `py generate_data.py` first for fresh data)
+3. **Run the fraud engine** (any or all):
+   ```
+   "%LOCALAPPDATA%\fmcg-postgres\pgsql\bin\psql.exe" -U postgres -h 127.0.0.1 -d fmcg -f sql\04_detect_channel_stuffing.sql
+   "%LOCALAPPDATA%\fmcg-postgres\pgsql\bin\psql.exe" -U postgres -h 127.0.0.1 -d fmcg -f sql\05_detect_promotion_leakage.sql
+   "%LOCALAPPDATA%\fmcg-postgres\pgsql\bin\psql.exe" -U postgres -h 127.0.0.1 -d fmcg -f sql\06_detect_route_falsification.sql
+   "%LOCALAPPDATA%\fmcg-postgres\pgsql\bin\psql.exe" -U postgres -h 127.0.0.1 -d fmcg -f sql\07_fraud_risk_view.sql
+   ```
+4. **The ranked risk list** (what a Regional Sales Manager reads daily):
+   ```
+   SELECT * FROM vw_fraud_risk_score ORDER BY risk_score DESC;
+   ```
+   Also exported to `reports/risk_list.csv` for BI tools.
+5. **Rebuild the dashboard** (export chart data, then render):
+   ```
+   "%LOCALAPPDATA%\fmcg-postgres\pgsql\bin\psql.exe" -U postgres -h 127.0.0.1 -d fmcg -f sql\08_dashboard_exports.sql
+   py build_dashboard.py
+   ```
+   Then open `reports/dashboard.html` in any browser — no server needed.
+6. **Stop the database** when done: `stop_postgres.bat`
 
-The final solution will enable analysts to:
-
-- Monitor inventory movement across distributors
-- Detect unusual sales behaviour automatically
-- Measure distributor performance using data
-- Support better inventory and promotion planning
-
----
-
-## Future Improvements
-
-- Machine Learning based anomaly detection
-- Real-time dashboard using streaming data
-- GIS-based distributor route analysis
-- Sales forecasting using historical trends
+> Note: PostgreSQL lives in `%LOCALAPPDATA%\fmcg-postgres` (outside OneDrive on purpose — a live database must never be cloud-synced). The server listens on `localhost:5432` with trust authentication, which is fine for a local learning project; real deployments use passwords (`scram-sha-256`).
