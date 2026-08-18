@@ -1,19 +1,4 @@
--- ============================================================
--- FILE 08: DASHBOARD DATASET EXPORTS
--- ============================================================
--- Feeds build_dashboard.py. Each \copy runs a query and writes the
--- result straight to a CSV on the CLIENT side (psql's \copy, as
--- opposed to the server-side COPY we used for loading in file 02).
---
--- Notice the pattern: the DASHBOARD does not re-derive anything.
--- All business logic already lives in the warehouse / the fraud
--- view; this layer only shapes data for presentation. In BI terms
--- these are "extracts" - the same idea as a Power BI dataset.
---
--- Drop-size buckets are pre-aggregated IN SQL: shipping 179k rows
--- to Python to count them there would be wasteful; shipping 16
--- summary rows is free. Aggregate where the data lives.
--- ============================================================
+
 
 -- 1) The ranked risk list (from the Phase 3 view)
 \copy (SELECT * FROM vw_fraud_risk_score ORDER BY risk_score DESC, distributor_id) TO 'C:/Users/SHASHANK/OneDrive/Documents/The FMCG Supply Chain Warehouse/reports/csv/risk_list.csv' WITH (FORMAT csv, HEADER true)
