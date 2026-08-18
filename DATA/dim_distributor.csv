@@ -1,0 +1,21 @@
+distributor_id,distributor_name,rep_id,region
+DIST001,Enterprise Sales 1,REP01,Urban
+DIST002,Enterprise Sales 2,REP03,Urban
+DIST003,Enterprise Sales 3,REP02,Urban
+DIST004,Enterprise Sales 4,REP01,Rural
+DIST005,Enterprise Sales 5,REP01,Rural
+DIST006,Enterprise Sales 6,REP04,Urban
+DIST007,Enterprise Sales 7,REP01,Urban
+DIST008,Enterprise Sales 8,REP02,Urban
+DIST009,Enterprise Sales 9,REP01,Rural
+DIST010,Enterprise Sales 10,REP02,Rural
+DIST011,Enterprise Sales 11,REP04,Urban
+DIST012,Enterprise Sales 12,REP04,Rural
+DIST013,Enterprise Sales 13,REP03,Urban
+DIST014,Enterprise Sales 14,REP02,Rural
+DIST015,Enterprise Sales 15,REP04,Semi-Urban
+DIST016,Enterprise Sales 16,REP03,Urban
+DIST017,Enterprise Sales 17,REP02,Semi-Urban
+DIST018,Enterprise Sales 18,REP01,Urban
+DIST019,Enterprise Sales 19,REP04,Urban
+DIST020,Enterprise Sales 20,REP03,Semi-Urban

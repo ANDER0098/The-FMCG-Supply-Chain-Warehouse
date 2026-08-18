@@ -1,0 +1,6 @@
+sku_id,brand,category,mrp,units_per_case
+SKU001,CleanMax,Soap,45,100
+SKU002,CleanMax,Detergent,120,50
+SKU003,HairGlow,Shampoo,180,40
+SKU004,NutriBite,Biscuits,30,120
+SKU005,NutriBite,Snacks,20,200
